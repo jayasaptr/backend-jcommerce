@@ -39,9 +39,9 @@ func main() {
 	r.POST("/api/v1/orders/:id/confirm")
 	r.GET("/api/v1/orders/:id")
 
-	r.POST("admin/products")
-	r.PUT("admin/products/:id")
-	r.DELETE("admin/products/:id")
+	r.POST("admin/products", handler.CraeteProduct(db))
+	r.PUT("admin/products/:id", handler.UpdateProduct(db))
+	r.DELETE("admin/products/:id", handler.DeleteProduct(db))
 
 	server := &http.Server{
 		Addr:    ":8080",
