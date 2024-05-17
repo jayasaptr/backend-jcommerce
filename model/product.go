@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 )
 
 type Products struct {
@@ -82,4 +84,61 @@ func UpdateProduct(db *sql.DB, product Products) error {
 	}
 
 	return nil
+}
+
+func DeleteProduct(db *sql.DB, id string) error {
+	if db == nil {
+		return ErrDBNil
+	}
+
+	query := `UPDATE products SET is_deleted = true WHERE id = $1`
+	_, err := db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SelectProductIn(db *sql.DB, ids []string) ([]Products, error) {
+	if db == nil {
+		return nil, ErrDBNil
+	}
+
+	if len(ids) == 0 {
+		return []Products{}, nil
+	}
+
+	placeholders := []string{}
+	arg := []interface{}{}
+
+	for i, id := range ids {
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
+		arg = append(arg, id)
+	}
+
+	query := fmt.Sprintf(`SELECT id, name, price FROM products WHERE is_deleted = false AND id IN (%s);`, strings.Join(placeholders, ","))
+	rows, err := db.Query(query, arg...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	products := []Products{}
+	for rows.Next() {
+		var product Products
+		err := rows.Scan(&product.ID, &product.Name, &product.Price)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }

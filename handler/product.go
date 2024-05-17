@@ -49,6 +49,8 @@ func GetProduct(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
+
+
 func CraeteProduct(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var product model.Products
@@ -106,5 +108,14 @@ func UpdateProduct(db *sql.DB) gin.HandlerFunc {
 }
 
 func DeleteProduct(db *sql.DB) gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		if err := model.DeleteProduct(db, id); err != nil {
+			log.Printf("Terjadi kesalahan ketika mendelete data: %v\n", err)
+			c.JSON(500, gin.H{"error": "Terjadi kesalahan pada server"})
+		}
+
+		c.JSON(204, gin.H{"message": "Product berhasil dihapus"})
+	}
 }

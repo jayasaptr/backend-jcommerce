@@ -7,6 +7,7 @@ docker run --name postgresql -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password
 2. Export ENV yang dibutuhkan
 ```
 export DB_URI=postgres://user:password@localhost:5432/toko?sslmode=disable
+export ADMIN_SECRET=secret
 ```
 
 3. Cara menjalankan program

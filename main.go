@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"toko-online/handler"
+	"toko-online/middleware"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -34,14 +35,14 @@ func main() {
 
 	r.GET("/api/v1/products", handler.ListProduct(db))
 	r.GET("/api/v1/products/:id", handler.GetProduct(db))
-	r.POST("/api/v1/checkout")
+	r.POST("/api/v1/checkout", handler.CheckoutOrder(db))
 
-	r.POST("/api/v1/orders/:id/confirm")
-	r.GET("/api/v1/orders/:id")
+	r.POST("/api/v1/orders/:id/confirm", handler.ConfirmOrder(db))
+	r.GET("/api/v1/orders/:id", handler.GetOrder(db))
 
-	r.POST("admin/products", handler.CraeteProduct(db))
-	r.PUT("admin/products/:id", handler.UpdateProduct(db))
-	r.DELETE("admin/products/:id", handler.DeleteProduct(db))
+	r.POST("admin/products", middleware.AdminOnly(), handler.CraeteProduct(db))
+	r.PUT("admin/products/:id", middleware.AdminOnly(), handler.UpdateProduct(db))
+	r.DELETE("admin/products/:id", middleware.AdminOnly(), handler.DeleteProduct(db))
 
 	server := &http.Server{
 		Addr:    ":8080",
